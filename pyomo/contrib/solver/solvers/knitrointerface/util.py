@@ -316,8 +316,11 @@ class KNITROSolverMixin(KNITROContextMixin):
             msg = f"Variable {var.name} already exists in KNITRO context."
             raise ValueError(msg)
 
+    def _get_var_idx(self, var: VarData) -> int:
+        return self._vars.get(id(var)).idx
+
     def _get_var_idxs(self, variables: List[VarData]) -> List[int]:
-        return [self._vars.get(id(v)).idx for v in variables]
+        return [self._get_var_idx(v) for v in variables]
 
     def _set_var_idx(self, var: KNITROVarData):
         kc = self._get_context()

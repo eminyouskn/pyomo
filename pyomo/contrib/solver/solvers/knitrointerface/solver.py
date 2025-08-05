@@ -32,6 +32,7 @@ class KNITRO(KNITROSolverMixin, PersistentSolverBase):
     Interface to the KNITRO solver.
     """
 
+    SOLVER_NAME = "KNITRO"
     CONFIG = KNITROConfig()
     _model: Optional[BlockData]
 
@@ -69,6 +70,8 @@ class KNITRO(KNITROSolverMixin, PersistentSolverBase):
 
         end = datetime.datetime.now(datetime.timezone.utc)
 
+        results.solver_name = self.SOLVER_NAME
+        results.solver_version = self.version()
         results.timing_info.start_timestamp = start
         results.timing_info.wall_time = (end - start).total_seconds()
         results.timing_info.timer = timer
@@ -92,16 +95,16 @@ class KNITRO(KNITROSolverMixin, PersistentSolverBase):
             self.add_constraints(cons)
 
     def add_variables(self, variables: List[VarData]):
-        self._validate_vars(variables)
-        self._register_vars(variables)
         self._add_vars(variables)
 
     def add_parameters(self, parameters: List[ParamData]):
-        self._validate_params(parameters)
-        self._register_params(parameters)
         self._add_params(parameters)
 
     def add_constraints(self, constraints: List[ConstraintData]):
-        self._validate_cons(constraints)
-        self._register_cons(constraints)
         self._add_cons(constraints)
+
+    def update(self, timer: Optional[HierarchicalTimer] = None):
+        if self._model is None:
+            raise ApplicationError("No model is set. Cannot update.")
+        if timer is None:
+            timer = HierarchicalTimer()

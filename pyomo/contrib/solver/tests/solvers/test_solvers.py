@@ -33,35 +33,42 @@ from pyomo.contrib.solver.solvers.ipopt import Ipopt
 from pyomo.contrib.solver.solvers.gurobi_persistent import GurobiPersistent
 from pyomo.contrib.solver.solvers.gurobi_direct import GurobiDirect
 from pyomo.contrib.solver.solvers.highs import Highs
+from pyomo.contrib.solver.solvers.knitro import KNSolver
 from pyomo.core.expr.numeric_expr import LinearExpression
 from pyomo.core.expr.compare import assertExpressionsEqual
 
 from pyomo.contrib.solver.tests.solvers import instances
 
-np, numpy_available = attempt_import('numpy')
-parameterized, param_available = attempt_import('parameterized')
+np, numpy_available = attempt_import("numpy")
+parameterized, param_available = attempt_import("parameterized")
 parameterized = parameterized.parameterized
 
 
 if not param_available:
-    raise unittest.SkipTest('Parameterized is not available.')
+    raise unittest.SkipTest("Parameterized is not available.")
 
 all_solvers = [
-    ('gurobi_persistent', GurobiPersistent),
-    ('gurobi_direct', GurobiDirect),
-    ('ipopt', Ipopt),
-    ('highs', Highs),
+    ("gurobi_persistent", GurobiPersistent),
+    ("gurobi_direct", GurobiDirect),
+    ("ipopt", Ipopt),
+    ("highs", Highs),
+    ("knitro", KNSolver),
 ]
 mip_solvers = [
-    ('gurobi_persistent', GurobiPersistent),
-    ('gurobi_direct', GurobiDirect),
-    ('highs', Highs),
+    ("gurobi_persistent", GurobiPersistent),
+    ("gurobi_direct", GurobiDirect),
+    ("highs", Highs),
+    ("knitro", KNSolver),
 ]
-nlp_solvers = [('ipopt', Ipopt)]
-qcp_solvers = [('gurobi_persistent', GurobiPersistent), ('ipopt', Ipopt)]
+nlp_solvers = [("ipopt", Ipopt), ("knitro", KNSolver)]
+qcp_solvers = [
+    ("gurobi_persistent", GurobiPersistent),
+    ("ipopt", Ipopt),
+    ("knitro", KNSolver),
+]
 qp_solvers = qcp_solvers + [("highs", Highs)]
-miqcqp_solvers = [('gurobi_persistent', GurobiPersistent)]
-nl_solvers = [('ipopt', Ipopt)]
+miqcqp_solvers = [("gurobi_persistent", GurobiPersistent), ("knitro", KNSolver)]
+nl_solvers = [("ipopt", Ipopt)]
 nl_solvers_set = {i[0] for i in nl_solvers}
 
 
@@ -93,13 +100,13 @@ class TestDualSignConvention(unittest.TestCase):
     def test_equality(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -147,13 +154,13 @@ class TestDualSignConvention(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -207,13 +214,13 @@ class TestDualSignConvention(unittest.TestCase):
     def test_bounds(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -262,13 +269,13 @@ class TestDualSignConvention(unittest.TestCase):
     def test_range(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -316,13 +323,13 @@ class TestDualSignConvention(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -370,13 +377,13 @@ class TestDualSignConvention(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -432,13 +439,13 @@ class TestDualSignConvention(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -489,13 +496,13 @@ class TestDualSignConvention(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
 
         # for now, we don't support getting duals if linear_presolve = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 raise unittest.SkipTest(
-                    f'cannot yet get duals if NLWriter presolve is on'
+                    "cannot yet get duals if NLWriter presolve is on"
                 )
             else:
                 opt.config.writer_config.linear_presolve = False
@@ -538,7 +545,7 @@ class TestDualSignConvention(unittest.TestCase):
         self.assertAlmostEqual(duals[m.c2], 0.5)
 
 
-@unittest.skipUnless(numpy_available, 'numpy is not available')
+@unittest.skipUnless(numpy_available, "numpy is not available")
 class TestSolvers(unittest.TestCase):
     @parameterized.expand(input=all_solvers)
     def test_config_overwrite(self, name: str, opt_class: Type[SolverBase]):
@@ -551,7 +558,7 @@ class TestSolvers(unittest.TestCase):
         # this test is for issue #2888
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -578,7 +585,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -626,7 +633,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -654,7 +661,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -683,7 +690,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -710,7 +717,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -757,7 +764,7 @@ class TestSolvers(unittest.TestCase):
         """
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -798,7 +805,7 @@ class TestSolvers(unittest.TestCase):
     def test_equality(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         check_duals = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
@@ -844,7 +851,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -889,7 +896,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         check_duals = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
@@ -930,7 +937,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -991,7 +998,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1029,15 +1036,15 @@ class TestSolvers(unittest.TestCase):
             # even if it did not converge; raise_exception_on_nonoptimal_result
             # is set to False, so we are free to load infeasible solutions
             with self.assertRaisesRegex(
-                NoSolutionError, '.*does not currently have a valid solution.*'
+                NoSolutionError, ".*does not currently have a valid solution.*"
             ):
                 res.solution_loader.load_vars()
             with self.assertRaisesRegex(
-                NoDualsError, '.*does not currently have valid duals.*'
+                NoDualsError, ".*does not currently have valid duals.*"
             ):
                 res.solution_loader.get_duals()
             with self.assertRaisesRegex(
-                NoReducedCostsError, '.*does not currently have valid reduced costs.*'
+                NoReducedCostsError, ".*does not currently have valid reduced costs.*"
             ):
                 res.solution_loader.get_reduced_costs()
 
@@ -1045,7 +1052,7 @@ class TestSolvers(unittest.TestCase):
     def test_duals(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1075,7 +1082,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1089,12 +1096,12 @@ class TestSolvers(unittest.TestCase):
         m.obj = pyo.Objective(expr=m.x**2 + m.y**2)
         m.c = pyo.Constraint(expr=m.y >= (m.a * m.x + m.b) ** 2)
 
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0.41024548525899274, 4)
         self.assertAlmostEqual(m.y.value, 0.34781038127030117, 4)
         m.a.value = 2
         m.b.value = -0.5
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0.10256137418973625, 4)
         self.assertAlmostEqual(m.y.value, 0.0869525991355825, 4)
 
@@ -1104,7 +1111,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1120,12 +1127,12 @@ class TestSolvers(unittest.TestCase):
         m.obj = pyo.Objective(expr=m.x**2 + m.c * m.y**2 + m.d * m.x)
         m.ccon = pyo.Constraint(expr=m.y >= (m.a * m.x + m.b) ** 2)
 
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0.2719178742733325, 4)
         self.assertAlmostEqual(m.y.value, 0.5301035741688002, 4)
         m.c.value = 3.5
         m.d.value = -1
-        res = opt.solve(m)
+        opt.solve(m)
 
         self.assertAlmostEqual(m.x.value, 0.6962249634573562, 4)
         self.assertAlmostEqual(m.y.value, 0.09227926676152151, 4)
@@ -1136,7 +1143,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1214,7 +1221,7 @@ class TestSolvers(unittest.TestCase):
             if opt.is_persistent():
                 opt = opt_class(treat_fixed_vars_as_params=treat_fixed_vars_as_params)
             if not opt.available():
-                raise unittest.SkipTest(f'Solver {opt.name} not available.')
+                raise unittest.SkipTest(f"Solver {opt.name} not available.")
             if any(name.startswith(i) for i in nl_solvers_set):
                 if use_presolve:
                     opt.config.writer_config.linear_presolve = True
@@ -1231,23 +1238,23 @@ class TestSolvers(unittest.TestCase):
             m.obj = pyo.Objective(expr=m.y)
             m.c1 = pyo.Constraint(expr=m.y >= a1 * m.x + b1)
             m.c2 = pyo.Constraint(expr=m.y >= a2 * m.x + b2)
-            res = opt.solve(m)
+            opt.solve(m)
             self.assertAlmostEqual(m.x.value, 0)
             self.assertAlmostEqual(m.y.value, 2)
             m.x.unfix()
-            res = opt.solve(m)
+            opt.solve(m)
             self.assertAlmostEqual(m.x.value, (b2 - b1) / (a1 - a2))
             self.assertAlmostEqual(m.y.value, a1 * (b2 - b1) / (a1 - a2) + b1)
             m.x.fix(0)
-            res = opt.solve(m)
+            opt.solve(m)
             self.assertAlmostEqual(m.x.value, 0)
             self.assertAlmostEqual(m.y.value, 2)
             m.x.value = 2
-            res = opt.solve(m)
+            opt.solve(m)
             self.assertAlmostEqual(m.x.value, 2)
             self.assertAlmostEqual(m.y.value, 3)
             m.x.value = 0
-            res = opt.solve(m)
+            opt.solve(m)
             self.assertAlmostEqual(m.x.value, 0)
             self.assertAlmostEqual(m.y.value, 2)
 
@@ -1259,7 +1266,7 @@ class TestSolvers(unittest.TestCase):
         if opt.is_persistent():
             opt = opt_class(treat_fixed_vars_as_params=True)
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1276,23 +1283,23 @@ class TestSolvers(unittest.TestCase):
         m.obj = pyo.Objective(expr=m.y)
         m.c1 = pyo.Constraint(expr=m.y >= a1 * m.x + b1)
         m.c2 = pyo.Constraint(expr=m.y >= a2 * m.x + b2)
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0)
         self.assertAlmostEqual(m.y.value, 2)
         m.x.unfix()
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, (b2 - b1) / (a1 - a2))
         self.assertAlmostEqual(m.y.value, a1 * (b2 - b1) / (a1 - a2) + b1)
         m.x.fix(0)
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0)
         self.assertAlmostEqual(m.y.value, 2)
         m.x.value = 2
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 2)
         self.assertAlmostEqual(m.y.value, 3)
         m.x.value = 0
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0)
         self.assertAlmostEqual(m.y.value, 2)
 
@@ -1304,7 +1311,7 @@ class TestSolvers(unittest.TestCase):
         if opt.is_persistent():
             opt = opt_class(treat_fixed_vars_as_params=True)
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1328,7 +1335,7 @@ class TestSolvers(unittest.TestCase):
         if opt.is_persistent():
             opt = opt_class(treat_fixed_vars_as_params=True)
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1340,10 +1347,10 @@ class TestSolvers(unittest.TestCase):
         m.obj = pyo.Objective(expr=m.x**2 + m.y**2)
         m.c1 = pyo.Constraint(expr=m.x == 2 / m.y)
         m.y.fix(1)
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 2)
         m.y.unfix()
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 2**0.5)
         self.assertAlmostEqual(m.y.value, 2**0.5)
 
@@ -1353,7 +1360,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1450,7 +1457,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1501,7 +1508,7 @@ class TestSolvers(unittest.TestCase):
     def test_exp(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1512,7 +1519,7 @@ class TestSolvers(unittest.TestCase):
         m.y = pyo.Var()
         m.obj = pyo.Objective(expr=m.x**2 + m.y**2)
         m.c1 = pyo.Constraint(expr=m.y >= pyo.exp(m.x))
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, -0.42630274815985264)
         self.assertAlmostEqual(m.y.value, 0.6529186341994245)
 
@@ -1520,7 +1527,7 @@ class TestSolvers(unittest.TestCase):
     def test_log(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1531,7 +1538,7 @@ class TestSolvers(unittest.TestCase):
         m.y = pyo.Var()
         m.obj = pyo.Objective(expr=m.x**2 + m.y**2)
         m.c1 = pyo.Constraint(expr=m.y <= pyo.log(m.x))
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.x.value, 0.6529186341994245)
         self.assertAlmostEqual(m.y.value, -0.42630274815985264)
 
@@ -1541,7 +1548,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1572,7 +1579,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1584,25 +1591,25 @@ class TestSolvers(unittest.TestCase):
         m.y.setlb(m.p)
         m.p.value = 1
         m.obj = pyo.Objective(expr=m.y)
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.y.value, 1)
         m.p.value = -1
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.y.value, -1)
         m.y.setlb(None)
         m.y.setub(m.p)
         m.obj.sense = pyo.maximize
         m.p.value = 5
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.y.value, 5)
         m.p.value = 4
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.y.value, 4)
         m.y.setub(None)
         m.y.setlb(m.p)
         m.obj.sense = pyo.minimize
         m.p.value = 3
-        res = opt.solve(m)
+        opt.solve(m)
         self.assertAlmostEqual(m.y.value, 3)
 
     @parameterized.expand(input=_load_tests(all_solvers))
@@ -1611,7 +1618,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1668,7 +1675,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1676,7 +1683,7 @@ class TestSolvers(unittest.TestCase):
                 opt.config.writer_config.linear_presolve = False
         from sys import platform
 
-        if platform == 'win32':
+        if platform == "win32":
             raise unittest.SkipTest
 
         N = 30
@@ -1731,7 +1738,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1800,7 +1807,7 @@ class TestSolvers(unittest.TestCase):
     def test_domain(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1831,7 +1838,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1862,7 +1869,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1895,7 +1902,7 @@ class TestSolvers(unittest.TestCase):
     def test_with_gdp(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1933,7 +1940,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -1967,7 +1974,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -2007,7 +2014,7 @@ class TestSolvers(unittest.TestCase):
     def test_bug_1(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
                 opt.config.writer_config.linear_presolve = True
@@ -2042,7 +2049,7 @@ class TestSolvers(unittest.TestCase):
             if opt.is_persistent():
                 opt = opt_class(treat_fixed_vars_as_params=fixed_var_option)
             if not opt.available():
-                raise unittest.SkipTest(f'Solver {opt.name} not available.')
+                raise unittest.SkipTest(f"Solver {opt.name} not available.")
             if any(name.startswith(i) for i in nl_solvers_set):
                 if use_presolve:
                     opt.config.writer_config.linear_presolve = True
@@ -2071,7 +2078,7 @@ class TestSolvers(unittest.TestCase):
     ):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         if use_presolve:
             opt.config.writer_config.linear_presolve = True
         else:
@@ -2134,7 +2141,7 @@ class TestSolvers(unittest.TestCase):
     def test_scaling(self, name: str, opt_class: Type[SolverBase], use_presolve: bool):
         opt: SolverBase = opt_class()
         if not opt.available():
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         check_duals = True
         if any(name.startswith(i) for i in nl_solvers_set):
             if use_presolve:
@@ -2209,9 +2216,9 @@ class TestSolvers(unittest.TestCase):
 class TestLegacySolverInterface(unittest.TestCase):
     @parameterized.expand(input=all_solvers)
     def test_param_updates(self, name: str, opt_class: Type[SolverBase]):
-        opt = pyo.SolverFactory(name + '_v2')
+        opt = pyo.SolverFactory(name + "_v2")
         if not opt.available(exception_flag=False):
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         m = pyo.ConcreteModel()
         m.x = pyo.Var()
         m.y = pyo.Var()
@@ -2239,9 +2246,9 @@ class TestLegacySolverInterface(unittest.TestCase):
 
     @parameterized.expand(input=all_solvers)
     def test_load_solutions(self, name: str, opt_class: Type[SolverBase]):
-        opt = pyo.SolverFactory(name + '_v2')
+        opt = pyo.SolverFactory(name + "_v2")
         if not opt.available(exception_flag=False):
-            raise unittest.SkipTest(f'Solver {opt.name} not available.')
+            raise unittest.SkipTest(f"Solver {opt.name} not available.")
         m = pyo.ConcreteModel()
         m.x = pyo.Var()
         m.obj = pyo.Objective(expr=m.x)

@@ -13,11 +13,7 @@
 from pyomo.contrib.solver.common.config import PersistentBranchAndBoundConfig
 
 
-class KNITROConfigMixin:
-    pass
-
-
-class KNITROConfig(PersistentBranchAndBoundConfig, KNITROConfigMixin):
+class KNConfig(PersistentBranchAndBoundConfig):
     """
     Configuration class for KNITRO solver.
     This class can be extended to include specific configuration options for KNITRO.
@@ -39,4 +35,3 @@ class KNITROConfig(PersistentBranchAndBoundConfig, KNITROConfigMixin):
             implicit_domain=implicit_domain,
             visibility=visibility,
         )
-        KNITROConfigMixin.__init__(self)

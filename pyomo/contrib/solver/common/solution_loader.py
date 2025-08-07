@@ -10,7 +10,7 @@
 #  ___________________________________________________________________________
 
 from typing import Sequence, Dict, Optional, Mapping, NoReturn
-
+from pyomo.contrib.solver.common.base import PersistentSolverBase
 from pyomo.core.base.constraint import ConstraintData
 from pyomo.core.base.var import VarData
 from pyomo.core.staleflag import StaleFlagManager
@@ -77,7 +77,7 @@ class SolutionLoaderBase:
         duals: dict
             Maps constraints to dual values
         """
-        raise NotImplementedError(f'{type(self)} does not support the get_duals method')
+        raise NotImplementedError(f"{type(self)} does not support the get_duals method")
 
     def get_reduced_costs(
         self, vars_to_load: Optional[Sequence[VarData]] = None
@@ -97,7 +97,7 @@ class SolutionLoaderBase:
             Maps variables to reduced costs
         """
         raise NotImplementedError(
-            f'{type(self)} does not support the get_reduced_costs method'
+            f"{type(self)} does not support the get_reduced_costs method"
         )
 
 
@@ -106,13 +106,13 @@ class PersistentSolutionLoader(SolutionLoaderBase):
     Loader for persistent solvers
     """
 
-    def __init__(self, solver):
+    def __init__(self, solver: PersistentSolverBase):
         self._solver = solver
         self._valid = True
 
     def _assert_solution_still_valid(self):
         if not self._valid:
-            raise RuntimeError('The results in the solver are no longer valid.')
+            raise RuntimeError("The results in the solver are no longer valid.")
 
     def get_primals(self, vars_to_load=None):
         self._assert_solution_still_valid()

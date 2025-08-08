@@ -393,6 +393,16 @@ class KNSolverUtils:
             msg = f"Constraint {con.name} is not registered in KNITRO context."
             raise ValueError(msg)
 
+    def _ensure_param_not_registered(self, param: ParamData):
+        if id(param) in self._params:
+            msg = f"Parameter {param.name} already exists in KNITRO context."
+            raise ValueError(msg)
+
+    def _ensure_param_is_registered(self, param: ParamData):
+        if id(param) not in self._params:
+            msg = f"Parameter {param.name} is not registered in KNITRO context."
+            raise ValueError(msg)
+
     def _ensure_var_not_used(self, var: VarData, expr: Expression):
         if id(var) in identify_variables(expr):
             msg = f"Variable {var.name} is used in the expression."
@@ -556,8 +566,8 @@ class KNSolverUtils:
         self._reset_con_terms(con)
         self._reset_con_bnds(con)
 
-    def _sync_obj(self, change: bool = False):
-        if change:
+    def _sync_obj(self, delete: bool = False):
+        if delete:
             self._reset_obj_terms()
             self._reset_obj_sense()
         obj = self._objective
@@ -633,14 +643,15 @@ class KNSolverUtils:
         for con in constraints:
             self._remove_con(con)
 
-    def _set_objective(self, obj: Optional[ObjectiveData]):
-        change = self._objective.obj is not None
-        self._objective.obj = obj
-        self._sync_obj(change=change)
-
     def _add_param(self, param: ParamData):
+        self._ensure_param_not_registered(param)
         p_id = id(param)
         self._params[p_id] = param
+
+    def _remove_param(self, param: ParamData):
+        p_id = id(param)
+        self._ensure_param_is_registered(param)
+        del self._params[p_id]
 
     def _add_params(self, parameters: List[ParamData]):
         for param in parameters:
@@ -656,7 +667,19 @@ class KNSolverUtils:
             self._sync_con(con, assign=False, change=True)
 
         self._objective.update()
-        self._sync_obj(change=True)
+        self._sync_obj(delete=True)
+
+    def _remove_params(self, parameters: List[ParamData]):
+        for param in parameters:
+            self._remove_param(param)
+
+    def _set_objective(self, obj: Optional[ObjectiveData]):
+        delete = self._objective.obj is not None
+        self._objective.obj = obj
+        self._sync_obj(delete=delete)
+
+    def _update(self, config: KNConfig, timer: HierarchicalTimer):
+        pass
 
     def _solve(self, config: KNConfig, timer: HierarchicalTimer) -> Results:
         stream = io.StringIO()

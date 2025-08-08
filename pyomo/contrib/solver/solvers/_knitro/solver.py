@@ -11,7 +11,7 @@
 
 
 import datetime
-from typing import List
+from typing import List, Optional
 
 from pyomo.common.errors import ApplicationError
 from pyomo.common.shutdown import python_is_shutting_down
@@ -52,9 +52,12 @@ class KNSolver(KNSolverUtils, PersistentSolverBase):
     CONFIG = KNConfig()
     config: KNConfig
 
+    _model: Optional[BlockData]
+
     def __init__(self, **kwds):
         PersistentSolverBase.__init__(self, **kwds)
         KNSolverUtils.__init__(self)
+        self._model = None
 
     def __del__(self):
         if not python_is_shutting_down():
@@ -76,9 +79,14 @@ class KNSolver(KNSolverUtils, PersistentSolverBase):
         if timer is None:
             timer = HierarchicalTimer()
 
-        timer.start("set_instance")
-        self.set_instance(model)
-        timer.stop("set_instance")
+        if model is not self._model:
+            timer.start("set_instance")
+            self.set_instance(model)
+            timer.stop("set_instance")
+        else:
+            timer.start("update")
+            self._update(config=config, timer=timer)
+            timer.stop("update")
 
         results = self._solve(config=config, timer=timer)
 
@@ -108,6 +116,7 @@ class KNSolver(KNSolverUtils, PersistentSolverBase):
         self._ensure_solver_is_available()
         self._reinit()
         self._ctx.create()
+        self._model = model
         self.add_block(model)
 
     def set_objective(self, obj: ObjectiveData):
@@ -123,6 +132,14 @@ class KNSolver(KNSolverUtils, PersistentSolverBase):
         obj = self._get_block_objective(block)
         self.set_objective(obj)
 
+    def remove_block(self, block: BlockData):
+        cons = self._get_block_cons(block)
+        self.remove_constraints(cons)
+        variables = self._get_block_vars(block)
+        self.remove_variables(variables)
+        params = self._get_block_params(block)
+        self.remove_parameters(params)
+
     def add_variables(self, variables: List[VarData]):
         self._add_vars(variables)
 
@@ -137,6 +154,18 @@ class KNSolver(KNSolverUtils, PersistentSolverBase):
 
     def update_parameters(self):
         self._update_params()
+
+    def update_constraints(self, constraints: List[ConstraintData]):
+        self._update_cons(constraints)
+
+    def remove_variables(self, variables):
+        self._remove_vars(variables)
+
+    def remove_parameters(self, parameters):
+        self._remove_params(parameters)
+
+    def remove_constraints(self, constraints):
+        self._remove_cons(constraints)
 
     def _get_primals(self, vars_to_load=None):
         return self._get_primal_sol(variables=vars_to_load)
